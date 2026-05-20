@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2 } from "lucide-react";
+import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   INSTALLERS,
@@ -24,18 +24,20 @@ interface UserRequest {
 interface DashboardViewProps {
   userRequest: UserRequest | null;
   onNavigate: (view: "formulier" | "dashboard") => void;
+  onOpenInstallateur: (request: RecentRequest) => void;
+  requestStatuses: Record<string, RecentRequest["status"]>;
 }
 
 type SortKey = "naam" | "stad" | "aanvragen" | "reactie" | "status";
 
-const SIDEBAR_ITEMS = [
+const SIDEBAR_ITEMS_BASE = [
   { icon: LayoutGrid, label: "Dashboard", tag: null },
-  { icon: List, label: "Aanvragen", tag: "24" },
-  { icon: Users, label: "Installateurs", tag: "25" },
+  { icon: List, label: "Aanvragen", tag: null as string | null },
+  { icon: Users, label: "Installateurs", tag: String(INSTALLERS.length) },
   { icon: BarChart3, label: "Statistieken", tag: null },
 ];
 
-export default function DashboardView({ userRequest, onNavigate }: DashboardViewProps) {
+export default function DashboardView({ userRequest, onNavigate, onOpenInstallateur, requestStatuses }: DashboardViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("naam");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [activeSidebar, setActiveSidebar] = useState("Dashboard");
@@ -71,12 +73,17 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
 
   const maxAanvragen = Math.max(...INSTALLERS.map((d) => d.aanvragen));
 
-  const allRequests: (RecentRequest & { isYou?: boolean })[] = userRequest
+  const allRequests: (RecentRequest & { isYou?: boolean })[] = (userRequest
     ? [
-        { ...userRequest, when: "zojuist", isYou: true } as RecentRequest & { isYou: boolean },
+        { ...userRequest, id: "req-new", telefoon: "", adres: "", postcode: "", status: "nieuw" as const, when: "zojuist", isYou: true },
         ...RECENT_REQUESTS,
       ]
-    : RECENT_REQUESTS;
+    : RECENT_REQUESTS
+  ).map((r) => (requestStatuses[r.id] ? { ...r, status: requestStatuses[r.id] } : r));
+
+  const SIDEBAR_ITEMS = SIDEBAR_ITEMS_BASE.map((item) =>
+    item.label === "Aanvragen" ? { ...item, tag: String(allRequests.length) } : item
+  );
 
   const requests = allRequests.filter((r, i) => !deletedRequests.has(`${r.naam}-${i}`));
 
@@ -154,10 +161,10 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
             <>
               {/* KPIs */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <KpiCard label="Totaal aanvragen" value={24} trend="↑ 12% deze week" trendUp />
+                <KpiCard label="Totaal aanvragen" value={allRequests.length} trend="↑ 12% deze week" trendUp />
                 <KpiCard label="Gekoppeld vandaag" value={3} trend="↑ 1 t.o.v. gisteren" trendUp />
                 <KpiCard label="Gem. reactietijd" value={2.1} decimals={1} suffix="uur" trend="↓ 18 min sneller" trendUp />
-                <KpiCard label="Openstaand" value={5} trend="Wacht op match" />
+                <KpiCard label="Openstaand" value={allRequests.filter(r => r.status === "nieuw").length} trend="Wacht op match" />
               </div>
 
               {/* Installer table (max 5) */}
@@ -195,6 +202,7 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
                 allRequests={allRequests}
                 onView={handleViewRequest}
                 onDelete={handleDeleteRequest}
+                onOpenInstallateur={onOpenInstallateur}
               />
             </>
           )}
@@ -206,6 +214,7 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
               allRequests={allRequests}
               onView={handleViewRequest}
               onDelete={handleDeleteRequest}
+              onOpenInstallateur={onOpenInstallateur}
             />
           )}
 
@@ -245,10 +254,10 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
           {/* Statistieken view */}
           {activeSidebar === "Statistieken" && (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <KpiCard label="Totaal aanvragen" value={24} trend="↑ 12% deze week" trendUp />
+              <KpiCard label="Totaal aanvragen" value={allRequests.length} trend="↑ 12% deze week" trendUp />
               <KpiCard label="Gekoppeld vandaag" value={3} trend="↑ 1 t.o.v. gisteren" trendUp />
               <KpiCard label="Gem. reactietijd" value={2.1} decimals={1} suffix="uur" trend="↓ 18 min sneller" trendUp />
-              <KpiCard label="Openstaand" value={5} trend="Wacht op match" />
+              <KpiCard label="Openstaand" value={allRequests.filter(r => r.status === "nieuw").length} trend="Wacht op match" />
             </div>
           )}
         </div>
@@ -411,11 +420,13 @@ function RequestList({
   allRequests,
   onView,
   onDelete,
+  onOpenInstallateur,
 }: {
   requests: (RecentRequest & { isYou?: boolean })[];
   allRequests: (RecentRequest & { isYou?: boolean })[];
   onView: (r: RecentRequest & { isYou?: boolean }) => void;
   onDelete: (key: string) => void;
+  onOpenInstallateur: (request: RecentRequest) => void;
 }) {
   return (
     <>
@@ -440,7 +451,7 @@ function RequestList({
             <div
               key={key}
               className={cn(
-                "grid grid-cols-[auto_1fr_auto_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-4 max-sm:gap-2.5 items-center",
+                "grid grid-cols-[auto_1fr_90px_110px_auto_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-3 max-sm:gap-2.5 items-center",
                 "px-4.5 py-3.5 border-b border-border text-sm last:border-b-0",
                 isYou && "bg-[rgba(111,143,106,0.10)] border-l-[3px] border-l-mda-success pl-[15px]"
               )}
@@ -462,7 +473,7 @@ function RequestList({
               </div>
               <span
                 className={cn(
-                  "font-medium text-[11px] tracking-[0.04em] px-2 py-1 rounded-full whitespace-nowrap",
+                  "inline-flex items-center justify-center font-medium text-[11px] tracking-[0.04em] px-2 py-1 rounded-full whitespace-nowrap w-full",
                   r.model === "kazumi" && "bg-[rgba(214,191,150,0.35)] text-[#7a5a2e]",
                   r.model === "haori" && "bg-[rgba(184,98,67,0.18)] text-[#7a3a25]",
                   r.model === "daiseikai" && "bg-[rgba(61,43,31,0.10)] text-mda-text"
@@ -470,6 +481,7 @@ function RequestList({
               >
                 {MODELS[r.model].name}
               </span>
+              <RequestStatusBadge status={r.status} />
               <div className="text-mda-text-muted text-[13px] max-sm:hidden">{r.when}</div>
               <Button
                 variant="outline"
@@ -478,6 +490,16 @@ function RequestList({
                 className="border-border text-mda-text hover:bg-[rgba(61,43,31,0.04)] text-xs px-3 py-1.5 h-auto"
               >
                 Bekijk →
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenInstallateur(r)}
+                className="border-primary/30 text-mda-accent hover:bg-primary/10 text-xs px-3 py-1.5 h-auto gap-1"
+                title="Open als installateur"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Reageer
               </Button>
               <button
                 onClick={() => onDelete(key)}
@@ -560,6 +582,22 @@ function KpiCard({
         {trend}
       </div>
     </div>
+  );
+}
+
+function RequestStatusBadge({ status }: { status: RecentRequest["status"] }) {
+  const config = {
+    nieuw: { label: "Nieuw", bg: "bg-[rgba(171,203,205,0.35)]", text: "text-[#1f3f40]", dot: "bg-primary" },
+    in_behandeling: { label: "In behandeling", bg: "bg-[rgba(196,155,108,0.18)]", text: "text-[#7a5a32]", dot: "bg-mda-warning" },
+    geaccepteerd: { label: "Geaccepteerd", bg: "bg-[rgba(111,143,106,0.14)]", text: "text-[#3e5a3a]", dot: "bg-mda-success" },
+    afgewezen: { label: "Afgewezen", bg: "bg-[rgba(196,60,60,0.12)]", text: "text-[#7a2a2a]", dot: "bg-destructive" },
+  };
+  const c = config[status];
+  return (
+    <span className={cn("inline-flex items-center justify-center gap-1.5 font-medium text-[11px] px-2 py-1 rounded-full whitespace-nowrap w-full", c.bg, c.text)}>
+      <span className={cn("w-1.5 h-1.5 rounded-full", c.dot)} />
+      {c.label}
+    </span>
   );
 }
 

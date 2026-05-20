@@ -21,10 +21,16 @@ export interface Installer {
 }
 
 export interface RecentRequest {
+  id: string;
   naam: string;
+  email: string;
+  telefoon: string;
+  adres: string;
+  postcode: string;
   stad: string;
   model: ModelKey;
   when: string;
+  status: "nieuw" | "in_behandeling" | "afgewezen" | "geaccepteerd";
 }
 
 export const MODELS: Record<ModelKey, AircoModel> = {
@@ -330,11 +336,11 @@ export const INSTALLERS: Installer[] = [
 ];
 
 export const RECENT_REQUESTS: RecentRequest[] = [
-  { naam: "Jan de Vries", stad: "Amsterdam", model: "haori", when: "vandaag, 14:22" },
-  { naam: "Sophie Janssen", stad: "Rotterdam", model: "kazumi", when: "vandaag, 11:08" },
-  { naam: "Thomas Bakker", stad: "Utrecht", model: "daiseikai", when: "gisteren, 16:44" },
-  { naam: "Emma van Dijk", stad: "Nijmegen", model: "haori", when: "gisteren, 09:30" },
-  { naam: "Lotte Smit", stad: "Eindhoven", model: "kazumi", when: "2 dagen geleden" },
+  { id: "req-001", naam: "Jan de Vries", email: "jan@voorbeeld.nl", telefoon: "06 12345678", adres: "Keizersgracht 102", postcode: "1015 AA", stad: "Amsterdam", model: "haori", when: "vandaag, 14:22", status: "nieuw" },
+  { id: "req-002", naam: "Sophie Janssen", email: "sophie.j@gmail.com", telefoon: "06 87654321", adres: "Witte de Withstraat 45", postcode: "3012 BK", stad: "Rotterdam", model: "kazumi", when: "vandaag, 11:08", status: "nieuw" },
+  { id: "req-003", naam: "Thomas Bakker", email: "t.bakker@outlook.nl", telefoon: "06 11223344", adres: "Oudegracht 78", postcode: "3511 AR", stad: "Utrecht", model: "daiseikai", when: "gisteren, 16:44", status: "in_behandeling" },
+  { id: "req-004", naam: "Emma van Dijk", email: "emma.vd@hotmail.com", telefoon: "06 55667788", adres: "Molenstraat 22", postcode: "6511 HB", stad: "Nijmegen", model: "haori", when: "gisteren, 09:30", status: "nieuw" },
+  { id: "req-005", naam: "Lotte Smit", email: "lotte.smit@gmail.com", telefoon: "06 99887766", adres: "Vestdijk 33", postcode: "5611 CA", stad: "Eindhoven", model: "kazumi", when: "2 dagen geleden", status: "nieuw" },
 ];
 
 export function postcodeToInstaller(pc: string): Installer {

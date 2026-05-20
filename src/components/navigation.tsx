@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-type ViewName = "formulier" | "dashboard";
+type ViewName = "formulier" | "dashboard" | "installateur";
 
 interface NavigationProps {
   activeView: ViewName;
@@ -13,6 +13,7 @@ interface NavigationProps {
 const TABS: { key: ViewName; label: string }[] = [
   { key: "formulier", label: "Aanvraag" },
   { key: "dashboard", label: "Dashboard" },
+  { key: "installateur", label: "Installateur" },
 ];
 
 export default function Navigation({ activeView, onNavigate }: NavigationProps) {
