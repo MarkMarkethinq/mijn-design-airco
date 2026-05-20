@@ -1,26 +1,208 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-serif);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --color-mda-bg: #F2F1EE;
+  --color-mda-button: #ABCBCD;
+  --color-mda-text: #3D2B1F;
+  --color-mda-text-muted: #8B7355;
+  --color-mda-surface: #FAFAF8;
+  --color-mda-border: rgba(61,43,31,0.10);
+  --color-mda-accent: #7A9E9F;
+  --color-mda-success: #6F8F6A;
+  --color-mda-warning: #C49B6C;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #F2F1EE;
+  --foreground: #3D2B1F;
+  --card: #FAFAF8;
+  --card-foreground: #3D2B1F;
+  --popover: #FAFAF8;
+  --popover-foreground: #3D2B1F;
+  --primary: #ABCBCD;
+  --primary-foreground: #1f3f40;
+  --secondary: #FAFAF8;
+  --secondary-foreground: #3D2B1F;
+  --muted: #F2F1EE;
+  --muted-foreground: #8B7355;
+  --accent: #7A9E9F;
+  --accent-foreground: #ffffff;
+  --destructive: #a45a4a;
+  --border: rgba(61,43,31,0.10);
+  --input: rgba(61,43,31,0.10);
+  --ring: rgba(122,158,159,0.18);
+  --chart-1: #ABCBCD;
+  --chart-2: #7A9E9F;
+  --chart-3: #6F8F6A;
+  --chart-4: #C49B6C;
+  --chart-5: #3D2B1F;
+  --radius: 0.625rem;
+  --sidebar: #FAFAF8;
+  --sidebar-foreground: #3D2B1F;
+  --sidebar-primary: #3D2B1F;
+  --sidebar-primary-foreground: #FAFAF8;
+  --sidebar-accent: rgba(171,203,205,0.35);
+  --sidebar-accent-foreground: #1f3f40;
+  --sidebar-border: rgba(61,43,31,0.10);
+  --sidebar-ring: rgba(122,158,159,0.18);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Leaflet overrides */
+.leaflet-container {
+  font-family: var(--font-sans) !important;
+  background: #E8E5DD !important;
+}
+.leaflet-control-attribution {
+  background: rgba(255,255,255,0.7) !important;
+  color: #7a7060 !important;
+  font-size: 11px !important;
+}
+.leaflet-control-attribution a {
+  color: #5a5040 !important;
+}
+
+/* Custom map pin */
+.pin {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--primary);
+  border: 3px solid #fff;
+  box-shadow: 0 4px 10px rgba(61,43,31,0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pin::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  transform: rotate(45deg);
+}
+.pin.selected {
+  background: var(--accent);
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 4px 10px rgba(61,43,31,0.22), 0 0 0 0 rgba(122,158,159,0.55); }
+  50% { box-shadow: 0 4px 10px rgba(61,43,31,0.22), 0 0 0 14px rgba(122,158,159,0); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes dash {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes rowIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-view-in {
+  animation: viewIn 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.animate-fade-up {
+  animation: fadeUp 0.35s ease both;
+}
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.animate-spin-loader {
+  animation: spin 0.8s linear infinite;
+}
+.check-ring {
+  stroke-dasharray: 170;
+  stroke-dashoffset: 170;
+  animation: dash 0.8s ease forwards;
+}
+.check-tick {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: dash 0.5s 0.5s ease forwards;
 }
