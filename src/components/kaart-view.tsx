@@ -9,9 +9,10 @@ import { cn } from "@/lib/utils";
 
 interface KaartViewProps {
   matchedInstaller: Installer | null;
+  compact?: boolean;
 }
 
-export default function KaartView({ matchedInstaller }: KaartViewProps) {
+export default function KaartView({ matchedInstaller, compact }: KaartViewProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMap = useRef<L.Map | null>(null);
   const markersRef = useRef<Record<string, L.Marker>>({});
@@ -111,6 +112,27 @@ export default function KaartView({ matchedInstaller }: KaartViewProps) {
   function handleMatchMessage() {
     alert(
       `Bericht verstuurd naar ${matchedInstaller?.naam || "de installateur"}. Ze nemen binnen één werkdag contact op.`
+    );
+  }
+
+  if (compact) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="text-[11px] tracking-[0.12em] uppercase text-mda-text-muted font-medium mb-2">
+          Installateurs in jouw buurt
+        </div>
+        <div
+          ref={mapRef}
+          className="flex-1 min-h-70 rounded-[10px] overflow-hidden border border-border shadow-[0_2px_12px_rgba(61,43,31,0.07)] bg-[#E8E5DD]"
+          aria-label="Kaart van Nederland met installateurs"
+        />
+        {selectedInstaller && (
+          <div className="mt-3 p-3 bg-card border border-border rounded-lg text-sm">
+            <div className="font-semibold">{selectedInstaller.naam}</div>
+            <div className="text-mda-text-muted text-[13px]">{selectedInstaller.stad} — {selectedInstaller.reactie.toFixed(1)}u reactietijd</div>
+          </div>
+        )}
+      </div>
     );
   }
 

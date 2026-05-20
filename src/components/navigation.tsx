@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-type ViewName = "formulier" | "kaart" | "dashboard";
+type ViewName = "formulier" | "dashboard";
 
 interface NavigationProps {
   activeView: ViewName;
@@ -11,7 +12,6 @@ interface NavigationProps {
 
 const TABS: { key: ViewName; label: string }[] = [
   { key: "formulier", label: "Aanvraag" },
-  { key: "kaart", label: "Kaart" },
   { key: "dashboard", label: "Dashboard" },
 ];
 
@@ -23,30 +23,14 @@ export default function Navigation({ activeView, onNavigate }: NavigationProps) 
           onClick={() => onNavigate("formulier")}
           className="flex items-center gap-2.5 no-underline text-mda-text"
         >
-          <svg
+          <Image
+            src="/assets/mda_logo_brown.svg"
+            alt="mijn design airco"
+            width={140}
+            height={28}
             className="h-7 w-auto"
-            viewBox="0 0 280 50"
-            xmlns="http://www.w3.org/2000/svg"
-            aria-label="mijn design airco"
-          >
-            <g
-              fill="#3D2B1F"
-              fontFamily="DM Sans, sans-serif"
-              fontWeight="500"
-              letterSpacing="0.5"
-            >
-              <text x="0" y="33" fontSize="26">mijn</text>
-              <text x="68" y="33" fontSize="26">design</text>
-              <text x="172" y="33" fontSize="26">airco</text>
-            </g>
-            <path
-              d="M252 6 L272 6 L272 44"
-              stroke="#3D2B1F"
-              strokeWidth="2.4"
-              fill="none"
-              strokeLinecap="square"
-            />
-          </svg>
+            priority
+          />
         </button>
 
         <div className="flex gap-1.5 flex-1" role="tablist">

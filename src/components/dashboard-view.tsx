@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { LayoutGrid, List, Users, BarChart3, Settings } from "lucide-react";
+import { LayoutGrid, List, Users, BarChart3, Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   INSTALLERS,
@@ -23,21 +23,23 @@ interface UserRequest {
 
 interface DashboardViewProps {
   userRequest: UserRequest | null;
-  onNavigate: (view: "formulier" | "kaart" | "dashboard") => void;
+  onNavigate: (view: "formulier" | "dashboard") => void;
 }
 
 type SortKey = "naam" | "stad" | "aanvragen" | "reactie" | "status";
 
 const SIDEBAR_ITEMS = [
-  { icon: LayoutGrid, label: "Dashboard", tag: null, active: true },
-  { icon: List, label: "Aanvragen", tag: "24", active: false },
-  { icon: Users, label: "Installateurs", tag: "5", active: false },
-  { icon: BarChart3, label: "Statistieken", tag: null, active: false },
+  { icon: LayoutGrid, label: "Dashboard", tag: null },
+  { icon: List, label: "Aanvragen", tag: "24" },
+  { icon: Users, label: "Installateurs", tag: "5" },
+  { icon: BarChart3, label: "Statistieken", tag: null },
 ];
 
 export default function DashboardView({ userRequest, onNavigate }: DashboardViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("naam");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [activeSidebar, setActiveSidebar] = useState("Dashboard");
+  const [selectedRequest, setSelectedRequest] = useState<(RecentRequest & { isYou?: boolean }) | null>(null);
   const handleSort = useCallback((key: SortKey) => {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -80,25 +82,26 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
             Overzicht
           </div>
           {SIDEBAR_ITEMS.map((item) => (
-            <div
+            <button
               key={item.label}
+              onClick={() => setActiveSidebar(item.label)}
               className={cn(
-                "flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm text-mda-text cursor-pointer transition-colors duration-150",
+                "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-sm text-mda-text cursor-pointer transition-colors duration-150 text-left",
                 "hover:bg-[rgba(61,43,31,0.04)]",
-                item.active && "bg-[rgba(171,203,205,0.35)] text-[#1f3f40] font-medium"
+                activeSidebar === item.label && "bg-[rgba(171,203,205,0.35)] text-[#1f3f40] font-medium"
               )}
             >
               <item.icon
                 className={cn(
                   "w-4 h-4 shrink-0 text-mda-text-muted",
-                  item.active && "text-[#1f3f40]"
+                  activeSidebar === item.label && "text-[#1f3f40]"
                 )}
               />
               {item.label}
               {item.tag && (
                 <span className="ml-auto text-[11px] text-mda-text-muted">{item.tag}</span>
               )}
-            </div>
+            </button>
           ))}
 
           <div className="px-3 pt-5 pb-1.5 font-medium text-[11px] tracking-[0.12em] uppercase text-mda-text-muted">
@@ -263,7 +266,7 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onNavigate("kaart")}
+                    onClick={() => setSelectedRequest(r)}
                     className="border-border text-mda-text hover:bg-[rgba(61,43,31,0.04)] text-xs px-3 py-1.5 h-auto"
                   >
                     Bekijk →
@@ -274,7 +277,63 @@ export default function DashboardView({ userRequest, onNavigate }: DashboardView
           </div>
         </div>
       </div>
+
+      {/* Request detail popup */}
+      {selectedRequest && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center p-4" onClick={() => setSelectedRequest(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div
+            className="relative bg-card border border-border rounded-[12px] shadow-[0_8px_40px_rgba(61,43,31,0.18)] w-full max-w-md p-6 animate-view-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedRequest(null)}
+              className="absolute top-4 right-4 text-mda-text-muted hover:text-mda-text transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-full bg-linear-to-br from-[#E7DDD0] to-[#CDBFAE] flex items-center justify-center font-medium text-sm text-[#5a4030]">
+                {getInitials(selectedRequest.naam)}
+              </div>
+              <div>
+                <div className="font-semibold text-lg">{selectedRequest.naam}</div>
+                <div className="text-mda-text-muted text-[13px]">{selectedRequest.when}</div>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t border-border pt-4">
+              <DetailRow label="Naam" value={selectedRequest.naam} />
+              <DetailRow label="Stad" value={selectedRequest.stad} />
+              <DetailRow label="Model" value={MODELS[selectedRequest.model].name} />
+              <DetailRow label="Ingediend" value={selectedRequest.when} />
+              {"email" in selectedRequest && (selectedRequest as UserRequest & RecentRequest).email ? (
+                <DetailRow label="E-mail" value={(selectedRequest as UserRequest & RecentRequest).email} />
+              ) : null}
+            </div>
+
+            <div className="mt-5 flex gap-2.5">
+              <Button
+                onClick={() => setSelectedRequest(null)}
+                className="flex-1 bg-primary text-primary-foreground hover:bg-accent hover:text-white"
+              >
+                Sluiten
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-center text-sm">
+      <span className="text-mda-text-muted">{label}</span>
+      <span className="font-medium">{value}</span>
+    </div>
   );
 }
 

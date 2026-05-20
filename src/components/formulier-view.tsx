@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { Shield, Clock, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,15 @@ import {
 import { MODELS, postcodeToInstaller, type ModelKey, type Installer } from "@/lib/data";
 import AircoPreview from "./airco-preview";
 
+const KaartView = dynamic(() => import("@/components/kaart-view"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin-loader" />
+    </div>
+  ),
+});
+
 interface FormulierViewProps {
   onSubmit: (data: {
     naam: string;
@@ -23,9 +33,10 @@ interface FormulierViewProps {
     model: ModelKey;
     matchedInstaller: Installer;
   }) => void;
+  matchedInstaller: Installer | null;
 }
 
-export default function FormulierView({ onSubmit }: FormulierViewProps) {
+export default function FormulierView({ onSubmit, matchedInstaller }: FormulierViewProps) {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("haori");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -141,9 +152,9 @@ export default function FormulierView({ onSubmit }: FormulierViewProps) {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="daiseikai">Daiseikai — matzwart, premium</SelectItem>
-                        <SelectItem value="haori">Haori — cognacbruin leer</SelectItem>
-                        <SelectItem value="kazumi">Kazumi — naturel houten latten</SelectItem>
+                        <SelectItem value="daiseikai">Daiseikai</SelectItem>
+                        <SelectItem value="haori">Haori</SelectItem>
+                        <SelectItem value="kazumi">Kazumi</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -180,7 +191,12 @@ export default function FormulierView({ onSubmit }: FormulierViewProps) {
             )}
           </div>
 
-          <AircoPreview selectedModel={selectedModel} />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AircoPreview selectedModel={selectedModel} />
+            <div className="min-h-80">
+              <KaartView matchedInstaller={matchedInstaller} compact />
+            </div>
+          </div>
         </div>
       </div>
     </section>
