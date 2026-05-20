@@ -87,9 +87,9 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
 
   return (
     <section className="animate-view-in">
-      <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-start">
-        {/* Left: intro + trust */}
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-8 lg:gap-12 items-stretch">
+        {/* Left: intro + trust + map */}
+        <div className="flex flex-col min-w-0">
           <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-4.5">
             Aanvraag · stap 1 van 1
           </div>
@@ -117,10 +117,14 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
               desc="Op basis van jouw postcode, geen onnodige reistijd"
             />
           </div>
+
+          <div className="mt-8 flex-1">
+            <KaartView matchedInstaller={matchedInstaller} compact />
+          </div>
         </div>
 
         {/* Right: form card + preview */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 min-w-0">
           <div className="bg-card border border-border rounded-[10px] shadow-[0_2px_12px_rgba(61,43,31,0.07)] p-7">
             {!success ? (
               <form onSubmit={handleSubmit} noValidate>
@@ -148,7 +152,7 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
                   <div className="flex flex-col gap-1.5 sm:col-span-2">
                     <Label>Type airco</Label>
                     <Select value={selectedModel} onValueChange={(v) => setSelectedModel(v as ModelKey)}>
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -186,17 +190,11 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
                 email={successData?.email || ""}
                 matchedInstaller={successData?.matchedInstaller || null}
                 onReset={handleReset}
-                onNavigateKaart={() => {/* handled by parent */}}
               />
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AircoPreview selectedModel={selectedModel} />
-            <div className="min-h-80">
-              <KaartView matchedInstaller={matchedInstaller} compact />
-            </div>
-          </div>
+          <AircoPreview selectedModel={selectedModel} />
         </div>
       </div>
     </section>
@@ -225,7 +223,6 @@ function SuccessState({
   email: string;
   matchedInstaller: Installer | null;
   onReset: () => void;
-  onNavigateKaart: () => void;
 }) {
   return (
     <div className="py-12 px-8 text-center flex flex-col items-center gap-2 animate-view-in">

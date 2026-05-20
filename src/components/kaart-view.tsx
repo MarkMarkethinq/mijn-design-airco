@@ -88,6 +88,10 @@ export default function KaartView({ matchedInstaller, compact }: KaartViewProps)
 
     return () => {
       cancelled = true;
+      if (leafletMap.current) {
+        leafletMap.current.remove();
+        leafletMap.current = null;
+      }
     };
   }, [updateMarkerStyles]);
 
@@ -98,10 +102,10 @@ export default function KaartView({ matchedInstaller, compact }: KaartViewProps)
   }, [mapReady, matchedInstaller, updateMarkerStyles]);
 
   useEffect(() => {
-    if (leafletMap.current) {
+    if (leafletMap.current && mapReady) {
       setTimeout(() => leafletMap.current?.invalidateSize(), 100);
     }
-  });
+  }, [mapReady]);
 
   function handleSelectInstaller() {
     alert(
@@ -115,11 +119,27 @@ export default function KaartView({ matchedInstaller, compact }: KaartViewProps)
     );
   }
 
+  function handleResetView() {
+    setSelectedInstaller(null);
+    updateMarkerStyles(null);
+    leafletMap.current?.setView([52.2, 5.3], 7, { animate: true });
+  }
+
   if (compact) {
     return (
       <div className="h-full flex flex-col">
-        <div className="text-[11px] tracking-[0.12em] uppercase text-mda-text-muted font-medium mb-2">
-          Installateurs in jouw buurt
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[11px] tracking-[0.12em] uppercase text-mda-text-muted font-medium">
+            Installateurs in jouw buurt
+          </div>
+          {selectedInstaller && (
+            <button
+              onClick={handleResetView}
+              className="text-[11px] text-mda-accent hover:text-mda-text font-medium transition-colors cursor-pointer"
+            >
+              Toon alles ↺
+            </button>
+          )}
         </div>
         <div
           ref={mapRef}

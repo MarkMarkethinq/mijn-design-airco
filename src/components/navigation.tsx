@@ -18,7 +18,7 @@ const TABS: { key: ViewName; label: string }[] = [
 export default function Navigation({ activeView, onNavigate }: NavigationProps) {
   return (
     <nav className="sticky top-0 z-50 bg-[rgba(242,241,238,0.85)] backdrop-blur-[10px] backdrop-saturate-[140%] border-b border-mda-border">
-      <div className="max-w-[1240px] mx-auto flex items-center gap-8 px-7 py-[18px]">
+      <div className="w-full max-w-[1240px] mx-auto flex items-center gap-8 px-7 py-[18px]">
         <button
           onClick={() => onNavigate("formulier")}
           className="flex items-center gap-2.5 no-underline text-mda-text"

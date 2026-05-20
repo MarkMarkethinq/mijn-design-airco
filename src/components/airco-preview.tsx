@@ -19,7 +19,7 @@ export default function AircoPreview({ selectedModel }: AircoPreviewProps) {
   }, [selectedModel]);
 
   return (
-    <div className="sticky top-24 p-2 bg-card border border-border rounded-[10px] shadow-[0_2px_12px_rgba(61,43,31,0.07)]">
+    <div className="sticky top-24 p-2 bg-card border border-border rounded-[10px] shadow-[0_2px_12px_rgba(61,43,31,0.07)] overflow-hidden">
       <div className="relative bg-gradient-to-b from-[#EFEDE7] to-[#E7E3DA] rounded-lg aspect-[4/3] overflow-hidden flex items-center justify-center">
         <div className="absolute inset-x-[8%] bottom-[16%] h-2 rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(61,43,31,0.18),transparent_70%)] blur-[2px]" />
         <Image
@@ -35,7 +35,7 @@ export default function AircoPreview({ selectedModel }: AircoPreviewProps) {
           priority
         />
       </div>
-      <div className="pt-4.5 px-3.5 pb-3">
+      <div className="pt-4.5 px-3.5 pb-3 min-h-[160px]">
         <div className="font-medium text-[11px] tracking-[0.14em] uppercase text-mda-text-muted">
           Geselecteerd model
         </div>
@@ -43,7 +43,7 @@ export default function AircoPreview({ selectedModel }: AircoPreviewProps) {
           <span>{model.name}</span>
           <em className="italic text-mda-text-muted text-lg">{model.jp}</em>
         </div>
-        <p className="text-mda-text-muted text-sm mb-3.5">{model.desc}</p>
+        <p className="text-mda-text-muted text-sm mb-3.5 min-h-[40px]">{model.desc}</p>
         <div className="flex gap-2">
           {model.swatches.map((color) => (
             <span

@@ -47,7 +47,7 @@ export default function Home() {
   return (
     <>
       <Navigation activeView={activeView} onNavigate={handleNavigate} />
-      <main className="max-w-[1240px] mx-auto px-7 pt-12 pb-18 max-sm:px-4.5 max-sm:pt-8 max-sm:pb-14 flex-1">
+      <main className="w-full max-w-[1240px] mx-auto px-7 pt-12 pb-18 max-sm:px-4.5 max-sm:pt-8 max-sm:pb-14 flex-1">
         {activeView === "formulier" && (
           <FormulierView onSubmit={handleFormSubmit} matchedInstaller={matchedInstaller} />
         )}
