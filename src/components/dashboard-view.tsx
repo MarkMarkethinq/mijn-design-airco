@@ -38,8 +38,6 @@ const SIDEBAR_ITEMS = [
 export default function DashboardView({ userRequest, onNavigate }: DashboardViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("naam");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const countersStarted = useRef(false);
-
   const handleSort = useCallback((key: SortKey) => {
     if (sortKey === key) {
       setSortDir((d) => (d === "asc" ? "desc" : "asc"));
