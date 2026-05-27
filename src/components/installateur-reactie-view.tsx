@@ -12,10 +12,11 @@ import { cn } from "@/lib/utils";
 interface InstallateurReactieViewProps {
   request: RecentRequest;
   onBack: () => void;
+  onComplete: () => void;
   onUpdateStatus: (requestId: string, status: RecentRequest["status"]) => void;
 }
 
-export default function InstallateurReactieView({ request, onBack, onUpdateStatus }: InstallateurReactieViewProps) {
+export default function InstallateurReactieView({ request, onBack, onComplete, onUpdateStatus }: InstallateurReactieViewProps) {
   const [responseState, setResponseState] = useState<"form" | "accepted" | "rejected">("form");
   const [submitting, setSubmitting] = useState(false);
 
@@ -55,11 +56,14 @@ export default function InstallateurReactieView({ request, onBack, onUpdateStatu
             <p className="text-mda-text-muted max-w-[42ch] mx-auto">
               Je reactie is verstuurd naar {request.naam}. De klant ontvangt een e-mail met jouw offerte en beschikbaarheid.
             </p>
+            <p className="text-mda-text-muted text-sm mt-2">
+              De demo is compleet! Bekijk het dashboard voor een overzicht.
+            </p>
             <Button
-              onClick={onBack}
+              onClick={onComplete}
               className="mt-6 bg-primary text-primary-foreground hover:bg-accent hover:text-white"
             >
-              Terug naar dashboard
+              Ga naar dashboard →
             </Button>
           </div>
         </div>
@@ -79,11 +83,14 @@ export default function InstallateurReactieView({ request, onBack, onUpdateStatu
             <p className="text-mda-text-muted max-w-[42ch] mx-auto">
               De aanvraag van {request.naam} is afgewezen. De klant wordt hiervan op de hoogte gesteld.
             </p>
+            <p className="text-mda-text-muted text-sm mt-2">
+              De demo is compleet! Bekijk het dashboard voor een overzicht.
+            </p>
             <Button
-              onClick={onBack}
+              onClick={onComplete}
               className="mt-6 bg-primary text-primary-foreground hover:bg-accent hover:text-white"
             >
-              Terug naar dashboard
+              Ga naar dashboard →
             </Button>
           </div>
         </div>
@@ -100,11 +107,11 @@ export default function InstallateurReactieView({ request, onBack, onUpdateStatu
           className="flex items-center gap-2 text-sm text-mda-text-muted hover:text-mda-text transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Terug naar dashboard
+          Terug naar stap 2
         </button>
 
         <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-2">
-          Installateur portaal · Aanvraag {request.id}
+          Demo · stap 3 van 3 — Installateur portaal
         </div>
         <h1 className="text-[34px] leading-[1.1] mb-8">
           Reageer op aanvraag

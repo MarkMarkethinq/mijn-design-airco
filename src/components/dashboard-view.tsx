@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2, ExternalLink } from "lucide-react";
+import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2, ExternalLink, ArrowRightLeft, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   INSTALLERS,
@@ -21,11 +21,18 @@ interface UserRequest {
   model: ModelKey;
 }
 
+interface RequestResolution {
+  installerNaam: string;
+  status: "geaccepteerd" | "afgewezen";
+  doorgestuurdNaar?: string;
+}
+
 interface DashboardViewProps {
   userRequest: UserRequest | null;
   onNavigate: (view: "formulier" | "dashboard") => void;
   onOpenInstallateur: (request: RecentRequest) => void;
   requestStatuses: Record<string, RecentRequest["status"]>;
+  requestResolutions: Record<string, RequestResolution>;
 }
 
 type SortKey = "naam" | "stad" | "aanvragen" | "reactie" | "status";
@@ -37,7 +44,7 @@ const SIDEBAR_ITEMS_BASE = [
   { icon: BarChart3, label: "Statistieken", tag: null },
 ];
 
-export default function DashboardView({ userRequest, onNavigate, onOpenInstallateur, requestStatuses }: DashboardViewProps) {
+export default function DashboardView({ userRequest, onNavigate, onOpenInstallateur, requestStatuses, requestResolutions }: DashboardViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("naam");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [activeSidebar, setActiveSidebar] = useState("Dashboard");
@@ -203,6 +210,7 @@ export default function DashboardView({ userRequest, onNavigate, onOpenInstallat
                 onView={handleViewRequest}
                 onDelete={handleDeleteRequest}
                 onOpenInstallateur={onOpenInstallateur}
+                requestResolutions={requestResolutions}
               />
             </>
           )}
@@ -215,6 +223,7 @@ export default function DashboardView({ userRequest, onNavigate, onOpenInstallat
               onView={handleViewRequest}
               onDelete={handleDeleteRequest}
               onOpenInstallateur={onOpenInstallateur}
+              requestResolutions={requestResolutions}
             />
           )}
 
@@ -421,12 +430,14 @@ function RequestList({
   onView,
   onDelete,
   onOpenInstallateur,
+  requestResolutions,
 }: {
   requests: (RecentRequest & { isYou?: boolean })[];
   allRequests: (RecentRequest & { isYou?: boolean })[];
   onView: (r: RecentRequest & { isYou?: boolean }) => void;
   onDelete: (key: string) => void;
   onOpenInstallateur: (request: RecentRequest) => void;
+  requestResolutions: Record<string, RequestResolution>;
 }) {
   return (
     <>
@@ -447,67 +458,97 @@ function RequestList({
             (ar) => ar.naam === r.naam && ar.when === r.when && ar.model === r.model
           );
           const key = `${r.naam}-${originalIndex}`;
+          const resolution = requestResolutions[r.id];
           return (
             <div
               key={key}
               className={cn(
-                "grid grid-cols-[auto_1fr_90px_110px_auto_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-3 max-sm:gap-2.5 items-center",
-                "px-4.5 py-3.5 border-b border-border text-sm last:border-b-0",
-                isYou && "bg-[rgba(111,143,106,0.10)] border-l-[3px] border-l-mda-success pl-[15px]"
+                "border-b border-border last:border-b-0",
+                isYou && "bg-[rgba(111,143,106,0.10)] border-l-[3px] border-l-mda-success"
               )}
               style={{ animation: `rowIn 0.5s ease ${i * 70}ms both` }}
             >
-              <div className="w-9 h-9 rounded-full bg-linear-to-br from-[#E7DDD0] to-[#CDBFAE] flex items-center justify-center font-medium text-[13px] text-[#5a4030]">
-                {getInitials(r.naam)}
-              </div>
-              <div>
-                <div className="font-medium">
-                  {r.naam}
-                  {isYou && (
-                    <span className="inline-block ml-2 text-[10px] tracking-[0.08em] uppercase bg-mda-success text-white px-1.5 py-0.5 rounded-full align-middle">
-                      jij
-                    </span>
-                  )}
-                </div>
-                <div className="text-mda-text-muted text-[13px] max-sm:hidden">{r.stad}</div>
-              </div>
-              <span
+              <div
                 className={cn(
-                  "inline-flex items-center justify-center font-medium text-[11px] tracking-[0.04em] px-2 py-1 rounded-full whitespace-nowrap w-full",
-                  r.model === "kazumi" && "bg-[rgba(214,191,150,0.35)] text-[#7a5a2e]",
-                  r.model === "haori" && "bg-[rgba(184,98,67,0.18)] text-[#7a3a25]",
-                  r.model === "daiseikai" && "bg-[rgba(61,43,31,0.10)] text-mda-text"
+                  "grid grid-cols-[auto_1fr_90px_110px_auto_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-3 max-sm:gap-2.5 items-center",
+                  "px-4.5 py-3.5 text-sm",
+                  isYou && "pl-[15px]"
                 )}
               >
-                {MODELS[r.model].name}
-              </span>
-              <RequestStatusBadge status={r.status} />
-              <div className="text-mda-text-muted text-[13px] max-sm:hidden">{r.when}</div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onView(r)}
-                className="border-border text-mda-text hover:bg-[rgba(61,43,31,0.04)] text-xs px-3 py-1.5 h-auto"
-              >
-                Bekijk →
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onOpenInstallateur(r)}
-                className="border-primary/30 text-mda-accent hover:bg-primary/10 text-xs px-3 py-1.5 h-auto gap-1"
-                title="Open als installateur"
-              >
-                <ExternalLink className="w-3 h-3" />
-                Reageer
-              </Button>
-              <button
-                onClick={() => onDelete(key)}
-                className="text-mda-text-muted hover:text-destructive transition-colors p-1"
-                title="Verwijder aanvraag"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+                <div className="w-9 h-9 rounded-full bg-linear-to-br from-[#E7DDD0] to-[#CDBFAE] flex items-center justify-center font-medium text-[13px] text-[#5a4030]">
+                  {getInitials(r.naam)}
+                </div>
+                <div>
+                  <div className="font-medium">
+                    {r.naam}
+                    {isYou && (
+                      <span className="inline-block ml-2 text-[10px] tracking-[0.08em] uppercase bg-mda-success text-white px-1.5 py-0.5 rounded-full align-middle">
+                        jij
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-mda-text-muted text-[13px] max-sm:hidden">{r.stad}</div>
+                </div>
+                <span
+                  className={cn(
+                    "inline-flex items-center justify-center font-medium text-[11px] tracking-[0.04em] px-2 py-1 rounded-full whitespace-nowrap w-full",
+                    r.model === "kazumi" && "bg-[rgba(214,191,150,0.35)] text-[#7a5a2e]",
+                    r.model === "haori" && "bg-[rgba(184,98,67,0.18)] text-[#7a3a25]",
+                    r.model === "daiseikai" && "bg-[rgba(61,43,31,0.10)] text-mda-text"
+                  )}
+                >
+                  {MODELS[r.model].name}
+                </span>
+                <RequestStatusBadge status={r.status} />
+                <div className="text-mda-text-muted text-[13px] max-sm:hidden">{r.when}</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onView(r)}
+                  className="border-border text-mda-text hover:bg-[rgba(61,43,31,0.04)] text-xs px-3 py-1.5 h-auto"
+                >
+                  Bekijk →
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenInstallateur(r)}
+                  className="border-primary/30 text-mda-accent hover:bg-primary/10 text-xs px-3 py-1.5 h-auto gap-1"
+                  title="Open als installateur"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Reageer
+                </Button>
+                <button
+                  onClick={() => onDelete(key)}
+                  className="text-mda-text-muted hover:text-destructive transition-colors p-1"
+                  title="Verwijder aanvraag"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              {resolution && (
+                <div className={cn(
+                  "px-4.5 pb-3.5 pt-0 ml-12 text-[13px] flex items-center gap-2",
+                  isYou && "pl-[15px] ml-12"
+                )}>
+                  {resolution.status === "geaccepteerd" ? (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5 text-mda-success shrink-0" />
+                      <span className="text-[#3e5a3a]">
+                        Geaccepteerd door <span className="font-semibold">{resolution.installerNaam}</span>
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowRightLeft className="w-3.5 h-3.5 text-mda-warning shrink-0" />
+                      <span className="text-[#7a5a32]">
+                        Afgewezen door {resolution.installerNaam} · Doorgezet naar <span className="font-semibold">{resolution.doorgestuurdNaar}</span>
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

@@ -29,14 +29,18 @@ interface FormulierViewProps {
   onSubmit: (data: {
     naam: string;
     email: string;
+    telefoon: string;
+    adres: string;
+    postcode: string;
     stad: string;
     model: ModelKey;
     matchedInstaller: Installer;
   }) => void;
   matchedInstaller: Installer | null;
+  onNextStep: () => void;
 }
 
-export default function FormulierView({ onSubmit, matchedInstaller }: FormulierViewProps) {
+export default function FormulierView({ onSubmit, matchedInstaller, onNextStep }: FormulierViewProps) {
   const [selectedModel, setSelectedModel] = useState<ModelKey>("haori");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -57,6 +61,8 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
     const formData = new FormData(form);
     const naam = formData.get("naam") as string;
     const email = formData.get("email") as string;
+    const tel = formData.get("tel") as string;
+    const adres = formData.get("adres") as string;
     const pc = formData.get("pc") as string;
 
     setSubmitting(true);
@@ -72,6 +78,9 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
       onSubmit({
         naam,
         email,
+        telefoon: tel,
+        adres,
+        postcode: pc,
         stad: matched.stad,
         model: selectedModel,
         matchedInstaller: matched,
@@ -91,7 +100,7 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
         {/* Left: intro + trust + map */}
         <div className="flex flex-col min-w-0">
           <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-4.5">
-            Aanvraag · stap 1 van 1
+            Demo · stap 1 van 3
           </div>
           <h1 className="text-5xl leading-[1.05] mb-3.5 max-w-[14ch]">
             Vul je gegevens in, wij regelen de rest.
@@ -190,6 +199,7 @@ export default function FormulierView({ onSubmit, matchedInstaller }: FormulierV
                 email={successData?.email || ""}
                 matchedInstaller={successData?.matchedInstaller || null}
                 onReset={handleReset}
+                onNextStep={onNextStep}
               />
             )}
           </div>
@@ -218,11 +228,13 @@ function SuccessState({
   email,
   matchedInstaller,
   onReset,
+  onNextStep,
 }: {
   firstName: string;
   email: string;
   matchedInstaller: Installer | null;
   onReset: () => void;
+  onNextStep: () => void;
 }) {
   return (
     <div className="py-12 px-8 text-center flex flex-col items-center gap-2 animate-view-in">
@@ -253,6 +265,12 @@ function SuccessState({
       )}
 
       <div className="mt-5.5 flex gap-2.5 flex-wrap justify-center">
+        <Button
+          onClick={onNextStep}
+          className="bg-primary text-primary-foreground hover:bg-accent hover:text-white h-11 px-6 font-semibold gap-2"
+        >
+          Bekijk de mail naar de installateur →
+        </Button>
         <Button
           variant="outline"
           onClick={onReset}
