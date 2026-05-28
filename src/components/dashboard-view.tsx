@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2, ExternalLink, ArrowRightLeft, CheckCircle2 } from "lucide-react";
+import { LayoutGrid, List, Users, BarChart3, Settings, X, Trash2, ArrowRightLeft, CheckCircle2, Bell, FileText, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   INSTALLERS,
@@ -27,10 +27,16 @@ interface RequestResolution {
   doorgestuurdNaar?: string;
 }
 
+export interface DashboardNotification {
+  id: string;
+  type: "aanvraag" | "offerte" | "afgewezen";
+  message: string;
+  timestamp: string;
+}
+
 interface DashboardViewProps {
+  notifications: DashboardNotification[];
   userRequest: UserRequest | null;
-  onNavigate: (view: "formulier" | "dashboard") => void;
-  onOpenInstallateur: (request: RecentRequest) => void;
   requestStatuses: Record<string, RecentRequest["status"]>;
   requestResolutions: Record<string, RequestResolution>;
 }
@@ -44,7 +50,7 @@ const SIDEBAR_ITEMS_BASE = [
   { icon: BarChart3, label: "Statistieken", tag: null },
 ];
 
-export default function DashboardView({ userRequest, onNavigate, onOpenInstallateur, requestStatuses, requestResolutions }: DashboardViewProps) {
+export default function DashboardView({ notifications, userRequest, requestStatuses, requestResolutions }: DashboardViewProps) {
   const [sortKey, setSortKey] = useState<SortKey>("naam");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [activeSidebar, setActiveSidebar] = useState("Dashboard");
@@ -166,6 +172,9 @@ export default function DashboardView({ userRequest, onNavigate, onOpenInstallat
           {/* Dashboard view */}
           {activeSidebar === "Dashboard" && (
             <>
+              {/* Notifications panel */}
+              <NotificationsPanel notifications={notifications} />
+
               {/* KPIs */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <KpiCard label="Totaal aanvragen" value={allRequests.length} trend="↑ 12% deze week" trendUp />
@@ -209,7 +218,6 @@ export default function DashboardView({ userRequest, onNavigate, onOpenInstallat
                 allRequests={allRequests}
                 onView={handleViewRequest}
                 onDelete={handleDeleteRequest}
-                onOpenInstallateur={onOpenInstallateur}
                 requestResolutions={requestResolutions}
               />
             </>
@@ -222,7 +230,6 @@ export default function DashboardView({ userRequest, onNavigate, onOpenInstallat
               allRequests={allRequests}
               onView={handleViewRequest}
               onDelete={handleDeleteRequest}
-              onOpenInstallateur={onOpenInstallateur}
               requestResolutions={requestResolutions}
             />
           )}
@@ -424,19 +431,58 @@ function InstallerTable({
   );
 }
 
+function NotificationsPanel({ notifications }: { notifications: DashboardNotification[] }) {
+  if (notifications.length === 0) {
+    return (
+      <div className="bg-card border border-border rounded-[10px] shadow-[0_2px_12px_rgba(61,43,31,0.07)] p-5 mb-6">
+        <div className="flex items-center gap-2.5 mb-3">
+          <Bell className="w-4.5 h-4.5 text-mda-text-muted" />
+          <h3 className="font-serif text-lg">Meldingen</h3>
+        </div>
+        <p className="text-sm text-mda-text-muted">Geen nieuwe meldingen — doorloop eerst de demo</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card border border-border rounded-[10px] shadow-[0_2px_12px_rgba(61,43,31,0.07)] p-5 mb-6">
+      <div className="flex items-center gap-2.5 mb-3">
+        <Bell className="w-4.5 h-4.5 text-mda-accent" />
+        <h3 className="font-serif text-lg">Meldingen</h3>
+        <span className="ml-auto text-[11px] font-semibold bg-mda-accent text-white px-2 py-0.5 rounded-full">
+          {notifications.length}
+        </span>
+      </div>
+      <div className="space-y-2.5">
+        {notifications.map((n) => (
+          <div key={n.id} className="flex items-start gap-3 text-sm py-2 border-b border-border last:border-b-0">
+            <span className="mt-0.5 shrink-0">
+              {n.type === "aanvraag" && <FileText className="w-4 h-4 text-primary" />}
+              {n.type === "offerte" && <CheckCircle2 className="w-4 h-4 text-mda-success" />}
+              {n.type === "afgewezen" && <XCircle className="w-4 h-4 text-mda-warning" />}
+            </span>
+            <div className="flex-1 min-w-0">
+              <p className="text-mda-text">{n.message}</p>
+            </div>
+            <span className="text-mda-text-muted text-xs whitespace-nowrap shrink-0">{n.timestamp}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RequestList({
   requests,
   allRequests,
   onView,
   onDelete,
-  onOpenInstallateur,
   requestResolutions,
 }: {
   requests: (RecentRequest & { isYou?: boolean })[];
   allRequests: (RecentRequest & { isYou?: boolean })[];
   onView: (r: RecentRequest & { isYou?: boolean }) => void;
   onDelete: (key: string) => void;
-  onOpenInstallateur: (request: RecentRequest) => void;
   requestResolutions: Record<string, RequestResolution>;
 }) {
   return (
@@ -470,7 +516,7 @@ function RequestList({
             >
               <div
                 className={cn(
-                  "grid grid-cols-[auto_1fr_90px_110px_auto_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-3 max-sm:gap-2.5 items-center",
+                  "grid grid-cols-[auto_1fr_90px_110px_auto_auto_auto] max-sm:grid-cols-[auto_1fr_auto_auto] gap-3 max-sm:gap-2.5 items-center",
                   "px-4.5 py-3.5 text-sm",
                   isYou && "pl-[15px]"
                 )}
@@ -508,16 +554,6 @@ function RequestList({
                   className="border-border text-mda-text hover:bg-[rgba(61,43,31,0.04)] text-xs px-3 py-1.5 h-auto"
                 >
                   Bekijk →
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onOpenInstallateur(r)}
-                  className="border-primary/30 text-mda-accent hover:bg-primary/10 text-xs px-3 py-1.5 h-auto gap-1"
-                  title="Open als installateur"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  Reageer
                 </Button>
                 <button
                   onClick={() => onDelete(key)}

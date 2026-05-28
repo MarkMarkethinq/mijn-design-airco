@@ -9,14 +9,26 @@ import { Textarea } from "@/components/ui/textarea";
 import { MODELS, type RecentRequest } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
+export interface InstallateurResponseData {
+  kosten: string;
+  datum: string;
+  doorlooptijd: string;
+  toelichting: string;
+  contact: string;
+  telefoon: string;
+  status: "geaccepteerd" | "afgewezen";
+}
+
 interface InstallateurReactieViewProps {
   request: RecentRequest;
   onBack: () => void;
   onComplete: () => void;
+  onGoToKlantOfferte: () => void;
   onUpdateStatus: (requestId: string, status: RecentRequest["status"]) => void;
+  onSaveResponse: (data: InstallateurResponseData) => void;
 }
 
-export default function InstallateurReactieView({ request, onBack, onComplete, onUpdateStatus }: InstallateurReactieViewProps) {
+export default function InstallateurReactieView({ request, onBack, onComplete, onGoToKlantOfferte, onUpdateStatus, onSaveResponse }: InstallateurReactieViewProps) {
   const [responseState, setResponseState] = useState<"form" | "accepted" | "rejected">("form");
   const [submitting, setSubmitting] = useState(false);
 
@@ -27,11 +39,21 @@ export default function InstallateurReactieView({ request, onBack, onComplete, o
       form.reportValidity();
       return;
     }
+    const formData = new FormData(form);
     setSubmitting(true);
     setTimeout(() => {
       setSubmitting(false);
       setResponseState("accepted");
       onUpdateStatus(request.id, "geaccepteerd");
+      onSaveResponse({
+        kosten: formData.get("kosten") as string,
+        datum: formData.get("datum") as string,
+        doorlooptijd: formData.get("doorlooptijd") as string,
+        toelichting: formData.get("toelichting") as string,
+        contact: formData.get("contact") as string,
+        telefoon: formData.get("telefoon") as string,
+        status: "geaccepteerd",
+      });
     }, 1200);
   }
 
@@ -41,6 +63,15 @@ export default function InstallateurReactieView({ request, onBack, onComplete, o
       setSubmitting(false);
       setResponseState("rejected");
       onUpdateStatus(request.id, "afgewezen");
+      onSaveResponse({
+        kosten: "",
+        datum: "",
+        doorlooptijd: "",
+        toelichting: "",
+        contact: "",
+        telefoon: "",
+        status: "afgewezen",
+      });
     }, 800);
   }
 
@@ -52,18 +83,15 @@ export default function InstallateurReactieView({ request, onBack, onComplete, o
             <div className="w-[78px] h-[78px] rounded-full bg-[rgba(111,143,106,0.18)] flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-10 h-10 text-mda-success" />
             </div>
-            <h2 className="text-[34px] leading-[1.1] mb-2">Reactie verstuurd!</h2>
+            <h2 className="text-[34px] leading-[1.1] mb-2">Offerte verstuurd!</h2>
             <p className="text-mda-text-muted max-w-[42ch] mx-auto">
-              Je reactie is verstuurd naar {request.naam}. De klant ontvangt een e-mail met jouw offerte en beschikbaarheid.
-            </p>
-            <p className="text-mda-text-muted text-sm mt-2">
-              De demo is compleet! Bekijk het dashboard voor een overzicht.
+              Je offerte is verstuurd naar {request.naam}. De klant ontvangt een e-mail met jouw offerte en beschikbaarheid.
             </p>
             <Button
-              onClick={onComplete}
+              onClick={onGoToKlantOfferte}
               className="mt-6 bg-primary text-primary-foreground hover:bg-accent hover:text-white"
             >
-              Ga naar dashboard →
+              Bekijk de offerte als klant →
             </Button>
           </div>
         </div>
@@ -83,14 +111,11 @@ export default function InstallateurReactieView({ request, onBack, onComplete, o
             <p className="text-mda-text-muted max-w-[42ch] mx-auto">
               De aanvraag van {request.naam} is afgewezen. De klant wordt hiervan op de hoogte gesteld.
             </p>
-            <p className="text-mda-text-muted text-sm mt-2">
-              De demo is compleet! Bekijk het dashboard voor een overzicht.
-            </p>
             <Button
-              onClick={onComplete}
+              onClick={onGoToKlantOfferte}
               className="mt-6 bg-primary text-primary-foreground hover:bg-accent hover:text-white"
             >
-              Ga naar dashboard →
+              Bekijk de status als klant →
             </Button>
           </div>
         </div>
@@ -107,11 +132,11 @@ export default function InstallateurReactieView({ request, onBack, onComplete, o
           className="flex items-center gap-2 text-sm text-mda-text-muted hover:text-mda-text transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
-          Terug naar stap 2
+          Terug naar aanvraag
         </button>
 
         <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-2">
-          Demo · stap 3 van 3 — Installateur portaal
+          Installateur · Reageren
         </div>
         <h1 className="text-[34px] leading-[1.1] mb-8">
           Reageer op aanvraag

@@ -38,10 +38,10 @@ export default function InstallerEmailView({ requestData, matchedInstaller, onNe
     <section className="animate-view-in">
       <div className="max-w-3xl mx-auto">
         <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-2">
-          Demo · stap 2 van 3
+          Installateur · Nieuwe aanvraag
         </div>
         <h1 className="text-[34px] leading-[1.1] mb-3">
-          E-mail naar installateur
+          Nieuwe aanvraag ontvangen
         </h1>
         <p className="text-mda-text-muted max-w-[52ch] text-base mb-8">
           Dit is de e-mail die <span className="font-semibold text-mda-text">{installer.naam}</span> ontvangt zodra een klant een aanvraag indient.
@@ -121,7 +121,7 @@ export default function InstallerEmailView({ requestData, matchedInstaller, onNe
                 onClick={onNextStep}
                 className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold text-sm hover:bg-accent hover:text-white transition-colors cursor-pointer"
               >
-                Bekijk aanvraag in portaal →
+                Reageer op deze aanvraag →
               </button>
             </div>
 
@@ -147,12 +147,12 @@ export default function InstallerEmailView({ requestData, matchedInstaller, onNe
             onClick={onNextStep}
             className="bg-primary text-primary-foreground hover:bg-accent hover:text-white h-12 px-8 text-[15px] font-semibold gap-2"
           >
-            Bekijk het installateur portaal
+            Bekijk aanvraag en reageer
             <ArrowRight className="w-4.5 h-4.5" />
           </Button>
         </div>
         <p className="text-center text-xs text-mda-text-muted mt-3">
-          Stap 3: Zie hoe de installateur reageert op de aanvraag
+          Reageer op de aanvraag met een offerte of afwijzing
         </p>
       </div>
     </section>

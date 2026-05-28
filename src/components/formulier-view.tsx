@@ -100,7 +100,7 @@ export default function FormulierView({ onSubmit, matchedInstaller, onNextStep }
         {/* Left: intro + trust + map */}
         <div className="flex flex-col min-w-0">
           <div className="font-medium text-xs tracking-[0.14em] uppercase text-mda-text-muted mb-4.5">
-            Demo · stap 1 van 3
+            Klant · Aanvraag
           </div>
           <h1 className="text-5xl leading-[1.05] mb-3.5 max-w-[14ch]">
             Vul je gegevens in, wij regelen de rest.
@@ -269,7 +269,7 @@ function SuccessState({
           onClick={onNextStep}
           className="bg-primary text-primary-foreground hover:bg-accent hover:text-white h-11 px-6 font-semibold gap-2"
         >
-          Bekijk de mail naar de installateur →
+          Bekijk je bevestigingsmail →
         </Button>
         <Button
           variant="outline"
